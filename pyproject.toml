@@ -1,12 +1,32 @@
 [project]
 name = "promptpad"
 version = "0.1.0"
-description = "Add your description here"
+description = "A modular prompt engineering framework for transforming raw user input into optimized prompts for large language models"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "langchain_openai",
     "python-dotenv",
     "langchain",
-    "langchain_community"
+    "langchain_community",
+    "flask"
 ]
+
+[project.scripts]
+promptpad = "promptpad.cli:main"
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "black",
+    "flake8",
+    "mypy"
+]
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["promptpad*"]
