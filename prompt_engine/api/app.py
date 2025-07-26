@@ -3,7 +3,7 @@ Flask application factory and routes for PromptPad API
 """
 
 from flask import Flask, request, jsonify
-from promptpad.core import PromptPipeline
+from prompt_engine.core import PromptPipeline
 
 
 def create_app() -> Flask:

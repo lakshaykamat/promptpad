@@ -1,0 +1,11 @@
+langchain_openai
+python-dotenv
+langchain
+langchain_community
+flask
+
+[dev]
+pytest
+black
+flake8
+mypy

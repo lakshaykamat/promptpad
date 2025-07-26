@@ -6,8 +6,8 @@ Supports both development and production modes
 
 import os
 from dotenv import load_dotenv
-from promptpad.api import create_app
-from promptpad.config import Settings
+from prompt_engine.api import create_app
+from prompt_engine.config import Settings
 
 # Load environment variables
 load_dotenv()

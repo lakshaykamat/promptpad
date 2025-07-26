@@ -1,0 +1,2 @@
+[console_scripts]
+prompt_engine = prompt_engine.cli:main

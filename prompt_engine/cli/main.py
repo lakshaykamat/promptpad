@@ -3,8 +3,8 @@ Command-line interface for PromptPad
 """
 
 import sys
-from promptpad.core import PromptPipeline
-from promptpad.config import Settings
+from prompt_engine.core import PromptPipeline
+from prompt_engine.config import Settings
 
 
 def main():

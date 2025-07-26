@@ -190,7 +190,7 @@ mypy promptpad/
 
 ## Migration from Old Structure
 
-The old `prompt-engine/main.py` file has been completely restructured. The functionality is now distributed across multiple modules:
+The old `prompt_engine/main.py` file has been completely restructured. The functionality is now distributed across multiple modules:
 
 - **Pipeline logic**: `promptpad/core/pipeline.py`
 - **Individual components**: `promptpad/core/*.py`

@@ -1,5 +1,5 @@
 [project]
-name = "promptpad"
+name = "prompt_engine"
 version = "0.1.0"
 description = "A modular prompt engineering framework for transforming raw user input into optimized prompts for large language models"
 readme = "README.md"
@@ -13,7 +13,7 @@ dependencies = [
 ]
 
 [project.scripts]
-promptpad = "promptpad.cli:main"
+prompt_engine = "prompt_engine.cli:main"
 
 [project.optional-dependencies]
 dev = [
@@ -29,4 +29,4 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["promptpad*"]
+include = ["prompt_engine*"]
