@@ -3,6 +3,7 @@ Flask application factory and routes for PromptPad API
 """
 
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from prompt_engine.core import PromptPipeline
 
 
@@ -14,6 +15,8 @@ def create_app() -> Flask:
         Configured Flask application
     """
     app = Flask(__name__)
+
+    CORS(app)  # This will allow CORS for all routes and all origins
     
     # Initialize the pipeline
     pipeline = PromptPipeline()

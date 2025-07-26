@@ -9,7 +9,8 @@ dependencies = [
     "python-dotenv",
     "langchain",
     "langchain_community",
-    "flask"
+    "flask",
+    "flask-cors"
 ]
 
 [project.scripts]
