@@ -86,11 +86,11 @@ class PromptPipeline:
                 "success": True,
                 "input": user_input,
                 "platform": platform,
-                "platform_context": platform_context,
-                "context_analysis": context_analysis,
+                "platformContext": platform_context,
+                "contextAnalysis": context_analysis,
                 "intent": intent,
-                "base_prompt": base_prompt,
-                "enhanced_prompt": enhanced_prompt,
+                "basePrompt": base_prompt,
+                "enhancedPrompt": enhanced_prompt,
                 "prompt": final_prompt
             }
             
