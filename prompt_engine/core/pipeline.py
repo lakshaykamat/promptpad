@@ -30,7 +30,45 @@ class PromptPipeline:
         self.enhancer = PromptEnhancer(self.llm)
         self.refiner = PromptRefiner(self.llm)
     
-    def run(self, user_input: str, platform: str = "Blog") -> Dict[str, Any]:
+    def _validate_platform(self, platform: str) -> str:
+        """
+        Validate the platform parameter.
+        
+        Args:
+            platform: The platform to validate
+            
+        Returns:
+            The validated platform string
+            
+        Raises:
+            ValueError: If platform is not valid
+        """
+        if platform not in PlatformTemplates.PLATFORMS:
+            raise ValueError(f"Invalid platform '{platform}'. Valid options: {', '.join(PlatformTemplates.PLATFORMS)}")
+        return platform
+    
+    def _setup_context(self, user_input: str, platform: str) -> Dict[str, Any]:
+        """
+        Set up the context analysis with platform information.
+        
+        Args:
+            user_input: The raw user input to process
+            platform: The target platform for customization
+            
+        Returns:
+            Dictionary containing the context analysis
+        """
+        # Get platform context
+        platform_context = PlatformTemplates.get_platform_context(platform)
+        
+        # Analyze context with platform consideration
+        context_analysis = self.context_analyzer.analyze(user_input)
+        context_analysis["platform"] = platform
+        context_analysis["platform_context"] = platform_context
+        
+        return context_analysis
+    
+    def run(self, user_input: str, platform: str) -> Dict[str, Any]:
         """
         Execute the complete prompt generation pipeline with platform customization.
         
@@ -43,30 +81,18 @@ class PromptPipeline:
         
         Args:
             user_input: The raw user input to process
-            platform: The target platform for customization (default: "Blog")
+            platform: The target platform for customization
             
         Returns:
             Dictionary containing all pipeline results or error information
         """
         try:
             # Validate platform
-            if platform not in PlatformTemplates.PLATFORMS:
-                platform = "Blog"  # Default fallback
+            platform = self._validate_platform(platform)
             
-            # Get platform context
-            platform_context = PlatformTemplates.get_platform_context(platform)
-            
-            # Create simple context for enhancement
-            context_analysis = {
-                "platform": platform,
-                "platform_context": platform_context,
-                "user_input": user_input
-            }
-            
-            # Step 1: Analyze context with platform consideration
-            context_analysis = self.context_analyzer.analyze(user_input)
-            context_analysis["platform"] = platform
-            context_analysis["platform_context"] = platform_context
+            # Set up context analysis
+            context_analysis = self._setup_context(user_input, platform)
+            platform_context = context_analysis["platform_context"]
             
             # Step 2: Extract comprehensive intent
             intent = self.interpreter.interpret(user_input, context_analysis)
@@ -102,13 +128,13 @@ class PromptPipeline:
                 "platform": platform
             }
     
-    def run_simple(self, user_input: str, platform: str = "Blog") -> Dict[str, Any]:
+    def run_simple(self, user_input: str, platform: str) -> Dict[str, Any]:
         """
         Execute pipeline and return only the final prompt.
         
         Args:
             user_input: The raw user input to process
-            platform: The target platform for customization (default: "Blog")
+            platform: The target platform for customization
             
         Returns:
             Dictionary containing only the final prompt or error information
@@ -123,4 +149,49 @@ class PromptPipeline:
                 "prompt": result["prompt"]
             }
         else:
-            return result 
+            return result
+
+    def stream(self, user_input: str, platform: str):
+        """
+        Stream the prompt generation process.
+        
+        Args:
+            user_input: The raw user input to process
+            platform: The target platform for customization
+            
+        Yields:
+            String chunks of the generated prompt
+        """
+        try:
+            # Validate platform
+            platform = self._validate_platform(platform)
+            
+            # Set up context analysis
+            context_analysis = self._setup_context(user_input, platform)
+            
+            yield f"Analyzing context for {platform}...\n"
+            
+            # Step 2: Extract intent
+            intent = self.interpreter.interpret(user_input, context_analysis)
+            yield f"Extracting intent...\n"
+            
+            # Step 3: Generate base prompt
+            platform_template = PlatformTemplates.get_platform_prompt_template(platform, user_input)
+            base_prompt = self.generator.generate(intent, context_analysis)
+            base_prompt = platform_template + "\n\n" + base_prompt
+            yield f"Generating base prompt...\n"
+            
+            # Step 4: Enhance prompt
+            enhanced_prompt = self.enhancer.enhance(base_prompt, context_analysis)
+            yield f"Enhancing prompt...\n"
+            
+            # Step 5: Refine prompt
+            final_prompt = self.refiner.refine(enhanced_prompt)
+            yield f"Refining prompt...\n"
+            
+            # Yield the final result
+            yield f"\n=== Enhanced Prompt for {platform} ===\n\n"
+            yield final_prompt
+            
+        except Exception as e:
+            yield f"Error: {str(e)}\n" 

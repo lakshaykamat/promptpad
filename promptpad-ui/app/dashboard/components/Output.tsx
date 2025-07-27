@@ -18,7 +18,15 @@ import {
   X,
 } from "lucide-react";
 
-function Output({ data }: { data: EnhancePromptApiResponse }) {
+function Output({ 
+  data, 
+  typing = false, 
+  displayedPrompt = "" 
+}: { 
+  data: EnhancePromptApiResponse;
+  typing?: boolean;
+  displayedPrompt?: string;
+}) {
   const [copySuccess, setCopySuccess] = useState(false);
   const [copyError, setCopyError] = useState<string | null>(null);
 
@@ -124,7 +132,8 @@ function Output({ data }: { data: EnhancePromptApiResponse }) {
             </div>
             <div className="flex-1 min-w-0">
               <pre className="whitespace-pre-wrap text-sm leading-relaxed text-foreground break-words">
-                {data.prompt}
+                {typing ? displayedPrompt : data.prompt}
+                {typing && <span className="inline-block w-0.5 h-5 bg-foreground animate-pulse ml-0.5"></span>}
               </pre>
             </div>
           </div>
@@ -132,7 +141,7 @@ function Output({ data }: { data: EnhancePromptApiResponse }) {
         
         {/* Character Count */}
         <div className="text-xs text-muted-foreground text-right">
-          {data.prompt.length} characters
+          {typing ? displayedPrompt.length : data.prompt.length} characters
         </div>
       </CardContent>
     </Card>

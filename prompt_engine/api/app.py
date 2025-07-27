@@ -5,6 +5,8 @@ Flask application factory and routes for PromptPad API
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from prompt_engine.core import PromptPipeline
+from flask import Response, stream_with_context
+import time
 
 
 def create_app() -> Flask:
@@ -35,6 +37,56 @@ def create_app() -> Flask:
         })
 
     @app.route('/generate', methods=['POST'])
+    def generate_prompt_stream():
+        """Stream enhanced prompt optimized for the selected platform."""
+        try:
+            data = request.get_json()
+            if not data:
+                return jsonify({
+                    "success": False,
+                    "error": "Request body must be valid JSON",
+                    "code": "INVALID_JSON"
+                }), 400
+
+            user_input = data.get('input', '').strip()
+            platform_input = data.get('platform', '').strip()
+
+            if not user_input or not platform_input:
+                return jsonify({
+                    "success": False,
+                    "error": "Missing or empty 'input' or 'platform'",
+                    "code": "MISSING_FIELDS"
+                }), 400
+
+            valid_platforms = ["Twitter", "LinkedIn", "YouTube", "Blog", "Email", "ChatGPT", "Cursor"]
+            if platform_input not in valid_platforms:
+                return jsonify({
+                    "success": False,
+                    "error": f"Invalid platform '{platform_input}'. Valid options: {', '.join(valid_platforms)}",
+                    "code": "INVALID_PLATFORM"
+                }), 400
+
+            def generate():
+                try:
+                    for chunk in pipeline.stream(user_input, platform_input):
+                        yield chunk
+                        time.sleep(0.05)
+                except ValueError as e:
+                    # Handle validation errors from pipeline
+                    yield f"Error: {str(e)}\n"
+                except Exception as e:
+                    yield f"Error: Internal server error - {str(e)}\n"
+
+            return Response(stream_with_context(generate()), mimetype='text/plain')
+
+        except Exception as e:
+            return jsonify({
+                "success": False,
+                "error": f"Internal server error: {str(e)}",
+                "code": "INTERNAL_ERROR"
+            }), 500
+
+    @app.route('/generate-full', methods=['POST'])
     def generate_prompt():
         """Generate an enhanced prompt optimized for the selected platform."""
         try:
