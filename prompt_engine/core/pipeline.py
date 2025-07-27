@@ -68,7 +68,7 @@ class PromptPipeline:
         
         return context_analysis
     
-    def run(self, user_input: str, platform: str = "Blog") -> Dict[str, Any]:
+    def run(self, user_input: str, platform: str) -> Dict[str, Any]:
         """
         Execute the complete prompt generation pipeline with platform customization.
         
@@ -81,7 +81,7 @@ class PromptPipeline:
         
         Args:
             user_input: The raw user input to process
-            platform: The target platform for customization (default: "Blog")
+            platform: The target platform for customization
             
         Returns:
             Dictionary containing all pipeline results or error information
@@ -128,13 +128,13 @@ class PromptPipeline:
                 "platform": platform
             }
     
-    def run_simple(self, user_input: str, platform: str = "Blog") -> Dict[str, Any]:
+    def run_simple(self, user_input: str, platform: str) -> Dict[str, Any]:
         """
         Execute pipeline and return only the final prompt.
         
         Args:
             user_input: The raw user input to process
-            platform: The target platform for customization (default: "Blog")
+            platform: The target platform for customization
             
         Returns:
             Dictionary containing only the final prompt or error information
@@ -151,13 +151,13 @@ class PromptPipeline:
         else:
             return result
 
-    def stream(self, user_input: str, platform: str = "Blog"):
+    def stream(self, user_input: str, platform: str):
         """
         Stream the prompt generation process.
         
         Args:
             user_input: The raw user input to process
-            platform: The target platform for customization (default: "Blog")
+            platform: The target platform for customization
             
         Yields:
             String chunks of the generated prompt
