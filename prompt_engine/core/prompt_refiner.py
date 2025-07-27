@@ -22,7 +22,7 @@ Refine the following prompt to ensure it is:
 Prompt to Refine:
 {prompt}
 
-Provide the final refined version that maintains all essential information while being polished and professional:"""
+Provide the final refined version that maintains all essential information while being polished and professional. DO NOT execute the prompt or generate content - only refine the prompt itself:"""
     
     def __init__(self, llm):
         """Initialize the prompt refiner with an LLM instance."""

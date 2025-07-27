@@ -27,7 +27,7 @@ Original Prompt:
 Context Analysis:
 {context_analysis}
 
-Provide an enhanced version that is more comprehensive and actionable:"""
+Provide an enhanced version that is more comprehensive and actionable. DO NOT execute the prompt or generate content - only enhance the prompt itself:"""
     
     def __init__(self, llm):
         """Initialize the prompt enhancer with an LLM instance."""
