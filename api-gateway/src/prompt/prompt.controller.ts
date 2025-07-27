@@ -1,4 +1,5 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, Res } from '@nestjs/common';
+import { Response } from 'express';
 import { PromptService } from './prompt.service';
 import { GeneratePromptDto } from './dto/generate-prompt.dto';
 
@@ -7,8 +8,8 @@ export class PromptController {
   constructor(private readonly promptService: PromptService) {}
 
   @Post('/generate')
-  generatePrompt(@Body() body: GeneratePromptDto) {
+  async generatePrompt(@Body() body: GeneratePromptDto, @Res() res: Response) {
     const { input, platform } = body;
-    return this.promptService.getEnhancedPrompt(input, platform);
+    await this.promptService.streamEnhancedPrompt(input, platform, res);
   }
 }
