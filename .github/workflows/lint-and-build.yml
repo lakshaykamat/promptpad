@@ -13,7 +13,7 @@ jobs:
 
     strategy:
       matrix:
-        project: [api-gateway, prompad-ui]
+        project: [api-gateway, promptpad-ui]
 
     defaults:
       run:
