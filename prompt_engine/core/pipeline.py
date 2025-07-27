@@ -63,18 +63,35 @@ class PromptPipeline:
                 "user_input": user_input
             }
             
-            # Step 1: Generate platform-specific prompt template
-            platform_template = PlatformTemplates.get_platform_prompt_template(platform, user_input)
+            # Step 1: Analyze context with platform consideration
+            context_analysis = self.context_analyzer.analyze(user_input)
+            context_analysis["platform"] = platform
+            context_analysis["platform_context"] = platform_context
             
-            # Step 2: Add platform context to the prompt
-            final_prompt = f"{platform_template}\n\nPlatform: {platform}\nCharacter Limit: {platform_context['character_limit']} characters\nTone: {platform_context['tone']}"
+            # Step 2: Extract comprehensive intent
+            intent = self.interpreter.interpret(user_input, context_analysis)
+            
+            # Step 3: Generate detailed base prompt with platform template
+            platform_template = PlatformTemplates.get_platform_prompt_template(platform, user_input)
+            base_prompt = self.generator.generate(intent, context_analysis)
+            base_prompt = platform_template + "\n\n" + base_prompt
+            
+            # Step 4: Enhance with depth and specificity
+            enhanced_prompt = self.enhancer.enhance(base_prompt, context_analysis)
+            
+            # Step 5: Refine for final clarity and effectiveness
+            final_prompt = self.refiner.refine(enhanced_prompt)
             
             return {
                 "success": True,
                 "input": user_input,
                 "platform": platform,
                 "platform_context": platform_context,
-                "final_prompt": final_prompt
+                "context_analysis": context_analysis,
+                "intent": intent,
+                "base_prompt": base_prompt,
+                "enhanced_prompt": enhanced_prompt,
+                "prompt": final_prompt
             }
             
         except Exception as e:
@@ -103,7 +120,7 @@ class PromptPipeline:
                 "success": True,
                 "input": result["input"],
                 "platform": result["platform"],
-                "prompt": result["final_prompt"]
+                "prompt": result["prompt"]
             }
         else:
             return result 

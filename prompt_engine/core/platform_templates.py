@@ -97,19 +97,19 @@ class PlatformTemplates:
         context = PlatformTemplates.get_platform_context(platform)
         
         templates = {
-            "Twitter": f"""Write a Twitter post about {user_input}. Make it engaging, shareable, and optimized for Twitter's algorithm. Keep it under {context['character_limit']} characters with a {context['tone']} tone. {context['style_guide']}""",
+            "Twitter": f"""You are a social media expert. Create a Twitter post about {user_input}. Make it engaging, shareable, and optimized for Twitter's algorithm. Keep it under {context['character_limit']} characters with a {context['tone']} tone. {context['style_guide']}""",
 
-            "LinkedIn": f"""Write a LinkedIn post about {user_input}. Demonstrate thought leadership and provide valuable insights. Keep it under {context['character_limit']} characters with a {context['tone']} tone. {context['style_guide']}""",
+            "LinkedIn": f"""You are a professional thought leader. Create a LinkedIn post about {user_input}. Demonstrate thought leadership and provide valuable insights. Keep it under {context['character_limit']} characters with a {context['tone']} tone. {context['style_guide']}""",
 
-            "YouTube": f"""Write a YouTube video script about {user_input}. Include a compelling hook, clear structure, engaging content, and strong call-to-action for viewers. Keep it under {context['character_limit']} characters with a {context['tone']} tone. {context['style_guide']}""",
+            "YouTube": f"""You are a YouTube content creator. Create a YouTube video script about {user_input}. Include a compelling hook, clear structure, engaging content, and strong call-to-action for viewers. Keep it under {context['character_limit']} characters with a {context['tone']} tone. {context['style_guide']}""",
 
-            "Blog": f"""Write a blog post about {user_input}. Structure with clear headings, provide valuable insights, and optimize for SEO. Keep it under {context['character_limit']} characters with a {context['tone']} tone. {context['style_guide']}""",
+            "Blog": f"""You are a professional blogger. Create a blog post about {user_input}. Structure with clear headings, provide valuable insights, and optimize for SEO. Keep it under {context['character_limit']} characters with a {context['tone']} tone. {context['style_guide']}""",
 
-            "Email": f"""Write a professional email about {user_input}. Include a clear subject line, appropriate greeting, concise content, and effective call-to-action. Keep it under {context['character_limit']} characters with a {context['tone']} tone. {context['style_guide']}""",
+            "Email": f"""You are a professional email writer. Create a professional email about {user_input}. Include a clear subject line, appropriate greeting, concise content, and effective call-to-action. Keep it under {context['character_limit']} characters with a {context['tone']} tone. {context['style_guide']}""",
 
-            "ChatGPT": f"""Write a detailed, specific prompt about {user_input}. Make it specific, detailed, and designed to get the best response from ChatGPT. Include context, clear instructions, and desired output format. Keep it under {context['character_limit']} characters with a {context['tone']} tone. {context['style_guide']}""",
+            "ChatGPT": f"""You are an AI prompt expert. Create a detailed, specific prompt about {user_input}. Make it specific, detailed, and designed to get the best response from ChatGPT. Include context, clear instructions, and desired output format. Keep it under {context['character_limit']} characters with a {context['tone']} tone. {context['style_guide']}""",
 
-            "Cursor": f"""Write a coding solution for {user_input}. Specify the programming language, include specific requirements, provide context, and give clear implementation guidelines. Keep it under {context['character_limit']} characters with a {context['tone']} tone. {context['style_guide']}"""
+            "Cursor": f"""You are a software developer. Create a coding solution for {user_input}. Specify the programming language, include specific requirements, provide context, and give clear implementation guidelines. Keep it under {context['character_limit']} characters with a {context['tone']} tone. {context['style_guide']}"""
         }
         
         return templates.get(platform, templates["Blog"])

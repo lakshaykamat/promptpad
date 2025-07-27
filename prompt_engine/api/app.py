@@ -15,6 +15,10 @@ def create_app() -> Flask:
         Configured Flask application
     """
     app = Flask(__name__)
+    
+    # Configure Flask to handle large responses
+    app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB limit
+    app.config['JSON_AS_ASCII'] = False  # Allow non-ASCII characters
 
     CORS(app)  # This will allow CORS for all routes and all origins
     
@@ -57,7 +61,7 @@ def create_app() -> Flask:
                 platform = "Blog"  # Default fallback
             
             # Generate the enhanced prompt with platform customization
-            result = pipeline.run_simple(user_input.strip(), platform)
+            result = pipeline.run(user_input.strip(), platform)
             
             if result['success']:
                 return jsonify(result), 200
@@ -70,49 +74,7 @@ def create_app() -> Flask:
                 "error": f"Internal server error: {str(e)}"
             }), 500
 
-    @app.route('/execute', methods=['POST'])
-    def execute_prompt():
-        """Execute a prompt and return the AI-generated response."""
-        try:
-            data = request.get_json()
-            
-            if not data or 'prompt' not in data:
-                return jsonify({
-                    "success": False,
-                    "error": "Missing 'prompt' field in request body"
-                }), 400
-            
-            prompt = data['prompt']
-            
-            if not prompt or not prompt.strip():
-                return jsonify({
-                    "success": False,
-                    "error": "Prompt cannot be empty"
-                }), 400
-            
-            # Execute the prompt using the LLM
-            try:
-                response = pipeline.llm.invoke(prompt.strip())
-                ai_response = response.content if hasattr(response, 'content') else str(response)
-                
-                return jsonify({
-                    "success": True,
-                    "prompt": prompt,
-                    "response": ai_response,
-                    "execution_time": "completed"
-                }), 200
-                
-            except Exception as llm_error:
-                return jsonify({
-                    "success": False,
-                    "error": f"LLM execution failed: {str(llm_error)}"
-                }), 500
-                
-        except Exception as e:
-            return jsonify({
-                "success": False,
-                "error": f"Internal server error: {str(e)}"
-            }), 500
+
     
     @app.route('/', methods=['GET'])
     def root():
@@ -134,12 +96,7 @@ def create_app() -> Flask:
                     },
                     "response": "Enhanced prompt optimized for the selected platform"
                 },
-                "POST /execute": {
-                    "body": {
-                        "prompt": "the prompt to execute"
-                    },
-                    "response": "AI-generated response to the prompt"
-                }
+
             }
         })
     
