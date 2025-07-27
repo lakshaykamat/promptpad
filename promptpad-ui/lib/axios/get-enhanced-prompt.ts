@@ -10,7 +10,7 @@ export interface EnhancePromptApiResponse {
 }
 
 export async function getEnhancedPrompt(userPrompt: string, platform: string = "Blog"): Promise<EnhancePromptApiResponse> {
-  const response = await axiosInstance.post("/generate", { 
+  const response = await axiosInstance.post("/prompt/generate", { 
     input: userPrompt,
     platform: platform
   });
