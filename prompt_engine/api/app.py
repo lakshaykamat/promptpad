@@ -15,6 +15,10 @@ def create_app() -> Flask:
         Configured Flask application
     """
     app = Flask(__name__)
+    
+    # Configure Flask to handle large responses
+    app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB limit
+    app.config['JSON_AS_ASCII'] = False  # Allow non-ASCII characters
 
     CORS(app)  # This will allow CORS for all routes and all origins
     
@@ -32,7 +36,7 @@ def create_app() -> Flask:
     
     @app.route('/generate', methods=['POST'])
     def generate_prompt():
-        """Generate a complete prompt with all pipeline stages."""
+        """Generate an enhanced prompt optimized for the selected platform."""
         try:
             data = request.get_json()
             
@@ -43,6 +47,7 @@ def create_app() -> Flask:
                 }), 400
             
             user_input = data['input']
+            platform = data.get('platform', 'Blog')  # Default to Blog if not specified
             
             if not user_input or not user_input.strip():
                 return jsonify({
@@ -50,8 +55,13 @@ def create_app() -> Flask:
                     "error": "Input cannot be empty"
                 }), 400
             
-            # Generate the prompt
-            result = pipeline.run(user_input.strip())
+            # Validate platform
+            valid_platforms = ["Twitter", "LinkedIn", "YouTube", "Blog", "Email", "ChatGPT", "Cursor"]
+            if platform not in valid_platforms:
+                platform = "Blog"  # Default fallback
+            
+            # Generate the enhanced prompt with platform customization
+            result = pipeline.run(user_input.strip(), platform)
             
             if result['success']:
                 return jsonify(result), 200
@@ -63,6 +73,8 @@ def create_app() -> Flask:
                 "success": False,
                 "error": f"Internal server error: {str(e)}"
             }), 500
+
+
     
     @app.route('/', methods=['GET'])
     def root():
@@ -78,9 +90,13 @@ def create_app() -> Flask:
             },
             "usage": {
                 "POST /generate": {
-                    "body": {"input": "your prompt or instruction"},
-                    "response": "Full pipeline results with all stages"
-                }
+                    "body": {
+                        "input": "your prompt or instruction",
+                        "platform": "Twitter | LinkedIn | YouTube | Blog | Email | ChatGPT | Cursor (optional, defaults to Blog)"
+                    },
+                    "response": "Enhanced prompt optimized for the selected platform"
+                },
+
             }
         })
     

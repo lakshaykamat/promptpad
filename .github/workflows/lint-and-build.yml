@@ -1,4 +1,4 @@
-name: 🔥 Lint & Build Mayhem
+name: Lint and Build
 
 on:
   push:
@@ -7,10 +7,8 @@ on:
     branches: [main]
 
 jobs:
-  chaos-ci:
-    name: 💥 Running ${{ matrix.project }} in the Fun Dimension
+  lint-and-build:
     runs-on: ubuntu-latest
-
     strategy:
       matrix:
         project: [api-gateway, promptpad-ui]
@@ -20,33 +18,19 @@ jobs:
         working-directory: ${{ matrix.project }}
 
     steps:
-      - name: 🧲 Pull in the Code Vortex
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: 🔮 Channel Node 22 from the Shadow Realm
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22'
 
-      - name: 🪄 Install Dependencies + Chaos Spices
-        run: |
-          corepack enable
-          pnpm install
-          pnpm add cowsay lolcatjs figlet --save-dev
+      - name: Install dependencies
+        run: npm install
 
-      - name: 🐄 Cow says hi
-        run: |
-          npx cowsay "Deploying ${{ matrix.project }}... Mooooooo 🚀"
+      - name: Lint
+        run: npm run lint
 
-      - name: 🌈 Lint with Rainbows
-        run: |
-          pnpm run lint | npx lolcatjs
-
-      - name: 🏗️ Build with Epic Header
-        run: |
-          npx figlet "BUILD TIME"
-          pnpm run build
-
-      - name: 🎊 Random Exit Message
-        run: |
-          echo "✨✨ CI complete for ${{ matrix.project }}!" | npx lolcatjs
+      - name: Build
+        run: npm run build
