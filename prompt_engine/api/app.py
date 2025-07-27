@@ -10,21 +10,21 @@ from prompt_engine.core import PromptPipeline
 def create_app() -> Flask:
     """
     Create and configure the Flask application.
-    
+
     Returns:
         Configured Flask application
     """
     app = Flask(__name__)
-    
+
     # Configure Flask to handle large responses
     app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB limit
     app.config['JSON_AS_ASCII'] = False  # Allow non-ASCII characters
 
-    CORS(app)  # This will allow CORS for all routes and all origins
-    
+    CORS(app)  # Allow CORS for all routes and all origins
+
     # Initialize the pipeline
     pipeline = PromptPipeline()
-    
+
     @app.route('/health', methods=['GET'])
     def health_check():
         """Health check endpoint."""
@@ -33,49 +33,66 @@ def create_app() -> Flask:
             "service": "promptpad",
             "version": "1.0.0"
         })
-    
+
     @app.route('/generate', methods=['POST'])
     def generate_prompt():
         """Generate an enhanced prompt optimized for the selected platform."""
         try:
             data = request.get_json()
-            
-            if not data or 'input' not in data:
+            if not data:
+                return jsonify({
+                    "success": False,
+                    "error": "Request body must be valid JSON"
+                }), 400
+
+            if 'input' not in data:
                 return jsonify({
                     "success": False,
                     "error": "Missing 'input' field in request body"
                 }), 400
-            
-            user_input = data['input']
-            platform = data.get('platform', 'Blog')  # Default to Blog if not specified
-            
-            if not user_input or not user_input.strip():
+
+            if 'platform' not in data:
+                return jsonify({
+                    "success": False,
+                    "error": "Missing 'platform' field in request body"
+                }), 400
+
+            user_input = data['input'].strip()
+            platform_input = data['platform'].strip()
+
+            if not user_input:
                 return jsonify({
                     "success": False,
                     "error": "Input cannot be empty"
                 }), 400
-            
-            # Validate platform
+
+            if not platform_input:
+                return jsonify({
+                    "success": False,
+                    "error": "Platform cannot be empty"
+                }), 400
+
             valid_platforms = ["Twitter", "LinkedIn", "YouTube", "Blog", "Email", "ChatGPT", "Cursor"]
-            if platform not in valid_platforms:
-                platform = "Blog"  # Default fallback
-            
-            # Generate the enhanced prompt with platform customization
-            result = pipeline.run(user_input.strip(), platform)
-            
+            if platform_input not in valid_platforms:
+                return jsonify({
+                    "success": False,
+                    "error": f"Invalid platform. Valid options are: {', '.join(valid_platforms)}"
+                }), 400
+
+            # Generate the enhanced prompt
+            result = pipeline.run(user_input, platform_input)
+
             if result['success']:
                 return jsonify(result), 200
             else:
                 return jsonify(result), 500
-                
+
         except Exception as e:
             return jsonify({
                 "success": False,
                 "error": f"Internal server error: {str(e)}"
             }), 500
 
-
-    
     @app.route('/', methods=['GET'])
     def root():
         """Root endpoint with API documentation."""
@@ -92,12 +109,14 @@ def create_app() -> Flask:
                 "POST /generate": {
                     "body": {
                         "input": "your prompt or instruction",
-                        "platform": "Twitter | LinkedIn | YouTube | Blog | Email | ChatGPT | Cursor (optional, defaults to Blog)"
+                        "platform": "Twitter | LinkedIn | YouTube | Blog | Email | ChatGPT | Cursor (required)"
                     },
-                    "response": "Enhanced prompt optimized for the selected platform"
-                },
-
+                    "response": {
+                        "success": True,
+                        "output": "Enhanced prompt optimized for the selected platform"
+                    }
+                }
             }
         })
-    
-    return app 
+
+    return app
