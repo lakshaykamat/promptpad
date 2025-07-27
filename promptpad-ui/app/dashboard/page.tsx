@@ -9,7 +9,6 @@ import {
   CardContent,
   Button,
   Textarea,
-  Badge,
   Alert,
   AlertDescription,
 } from "@/components/index";
@@ -32,12 +31,41 @@ import {
   X,
 } from "lucide-react";
 
+// Constants for input validation
+const INPUT_LIMITS = {
+  MIN_LENGTH: 10,
+  MAX_LENGTH: 500,
+  MIN_LENGTH_MESSAGE: "Please provide more details",
+  MAX_LENGTH_MESSAGE: "Consider shortening your description",
+  GOOD_LENGTH_MESSAGE: "Good length",
+} as const;
+
+// Progress message patterns for filtering
+const PROGRESS_PATTERNS = [
+  "Analyzing context",
+  "Extracting intent", 
+  "Generating base prompt",
+  "Enhancing prompt",
+  "Refining prompt",
+] as const;
+
 export default function Dashboard() {
   const [userInput, setUserInput] = useState("");
-  const [selectedPlatform, setSelectedPlatform] = useState("Blog");
-  const [output, setOutput] = useState<EnhancePromptApiResponse | null>(null);
+  const [selectedPlatform, setSelectedPlatform] = useState("");
   const [loading, setLoading] = useState(false);
+  const [output, setOutput] = useState<EnhancePromptApiResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [typing, setTyping] = useState(false);
+  const [displayedPrompt, setDisplayedPrompt] = useState("");
+  const [currentProgress, setCurrentProgress] = useState("");
+
+  // Computed state for input validation
+  const inputLength = userInput.length;
+  const inputStatus = inputLength < INPUT_LIMITS.MIN_LENGTH 
+    ? INPUT_LIMITS.MIN_LENGTH_MESSAGE
+    : inputLength > INPUT_LIMITS.MAX_LENGTH
+    ? INPUT_LIMITS.MAX_LENGTH_MESSAGE
+    : INPUT_LIMITS.GOOD_LENGTH_MESSAGE;
 
   const platforms = [
     {
@@ -90,13 +118,44 @@ export default function Dashboard() {
       return;
     }
 
+    if (!selectedPlatform) {
+      setError("Please select a platform to generate a prompt.");
+      return;
+    }
+
     setLoading(true);
     setError(null);
+    setOutput(null);
+    setTyping(false);
+    setDisplayedPrompt("");
+    setCurrentProgress("");
 
     try {
       const response = await getEnhancedPrompt(
         userInput.trim(),
-        selectedPlatform
+        selectedPlatform,
+        (chunk) => {
+          // Real-time streaming from Flask API
+          // Show progress messages
+          if (PROGRESS_PATTERNS.some(pattern => chunk.includes(pattern))) {
+            setCurrentProgress(chunk.trim());
+            return;
+          }
+          
+          // Only show content after the "===" marker (the actual prompt)
+          if (chunk.includes("===")) {
+            // Reset and start showing the actual prompt
+            setDisplayedPrompt("");
+            setTyping(true);
+            setCurrentProgress(""); // Clear progress message
+          } else if (chunk.includes("Enhanced Prompt for")) {
+            // Skip the header line
+            return;
+          } else if (typing) {
+            // Only add to displayed prompt if we're in typing mode (after ===)
+            setDisplayedPrompt(prev => prev + chunk);
+          }
+        }
       );
 
       if (!response.success) {
@@ -104,23 +163,32 @@ export default function Dashboard() {
       }
 
       setOutput(response);
+      setTyping(false); // Stop typing animation when complete
     } catch (error) {
       console.error("Generation error:", error);
 
-      let errorMessage =
-        "An unexpected error occurred while generating your prompt.";
+      let errorMessage = "An unexpected error occurred while generating your prompt.";
 
       if (error instanceof Error) {
-        if (error.message.includes("fetch")) {
-          errorMessage =
-            "Unable to connect to the server. Please check your internet connection and try again.";
-        } else if (error.message.includes("timeout")) {
-          errorMessage =
-            "The request timed out. Please try again with a shorter content description.";
-        } else if (error.message.includes("rate limit")) {
-          errorMessage =
-            "Too many requests. Please wait a moment before trying again.";
+        const errorText = error.message.toLowerCase();
+        
+        // Handle specific error codes from the API
+        if (errorText.includes('invalid_platform')) {
+          errorMessage = "Please select a valid platform from the options above.";
+        } else if (errorText.includes('missing_fields')) {
+          errorMessage = "Please provide both content idea and platform selection.";
+        } else if (errorText.includes('timeout')) {
+          errorMessage = "The request timed out. Please try again with a shorter content description.";
+        } else if (errorText.includes('network_error')) {
+          errorMessage = "Unable to connect to the server. Please check your internet connection and try again.";
+        } else if (errorText.includes('config_error')) {
+          errorMessage = "Server configuration error. Please try again later.";
+        } else if (errorText.includes('internal_error')) {
+          errorMessage = "Server error occurred. Please try again later.";
+        } else if (errorText.includes('api base url is not configured')) {
+          errorMessage = "Application configuration error. Please contact support.";
         } else {
+          // Use the error message from the API if available
           errorMessage = error.message;
         }
       }
@@ -286,19 +354,14 @@ export default function Dashboard() {
                   <div className="flex justify-between items-center text-xs text-muted-foreground">
                     <span>{userInput.length} characters</span>
                     <span>
-                      {userInput.length > 0 &&
-                        (userInput.length < 10
-                          ? "Please provide more details"
-                          : userInput.length > 500
-                          ? "Consider shortening your description"
-                          : "Good length")}
+                      {inputStatus}
                     </span>
                   </div>
                 </div>
 
                 <Button
                   onClick={handleGenerate}
-                  disabled={loading || !userInput.trim()}
+                  disabled={loading || !userInput.trim() || !selectedPlatform}
                   className="w-full py-3 text-base font-medium"
                 >
                   {loading ? (
@@ -320,7 +383,11 @@ export default function Dashboard() {
           {/* Right Side - Output */}
           <div className="space-y-6">
             {output ? (
-              <Output data={output} />
+              <Output 
+                data={output} 
+                typing={typing}
+                displayedPrompt={displayedPrompt}
+              />
             ) : (
               <Card className="h-full">
                 <CardHeader className="pb-4">
@@ -352,6 +419,8 @@ export default function Dashboard() {
                       >
                         {error ? (
                           <AlertCircle className="h-8 w-8 text-destructive" />
+                        ) : loading ? (
+                          <div className="animate-spin rounded-full h-8 w-8 border-2 border-current border-t-transparent"></div>
                         ) : (
                           <Sparkles className="h-8 w-8 text-muted-foreground" />
                         )}
@@ -362,7 +431,9 @@ export default function Dashboard() {
                         }`}
                       >
                         {error
-                          ? "Unable to generate prompt due to an error"
+                          ? "Fix the error above and try again"
+                          : loading
+                          ? currentProgress || "Generating your enhanced prompt..."
                           : "Select a platform and enter your content idea to generate an enhanced prompt"}
                       </p>
                     </div>
