@@ -6,6 +6,7 @@ export interface EnhancePromptApiResponse {
   platform: string;
   prompt: string;
   success: boolean;
+  error?: string;
 }
 
 export async function getEnhancedPrompt(userPrompt: string, platform: string = "Blog"): Promise<EnhancePromptApiResponse> {
