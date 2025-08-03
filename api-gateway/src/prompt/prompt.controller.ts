@@ -10,6 +10,6 @@ export class PromptController {
   @Post('/generate')
   async generatePrompt(@Body() body: GeneratePromptDto, @Res() res: Response) {
     const { input, platform } = body;
-    await this.promptService.streamEnhancedPrompt(input, platform, res);
+    await this.promptService.streamEnhancedPrompt(input, res, platform);
   }
 }

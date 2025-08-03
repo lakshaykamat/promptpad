@@ -51,14 +51,18 @@ def create_app() -> Flask:
             user_input = data.get('input', '').strip()
             platform_input = data.get('platform', '').strip()
 
-            if not user_input or not platform_input:
+            if not user_input:
                 return jsonify({
                     "success": False,
-                    "error": "Missing or empty 'input' or 'platform'",
-                    "code": "MISSING_FIELDS"
+                    "error": "Missing or empty 'input'",
+                    "code": "MISSING_INPUT"
                 }), 400
 
-            valid_platforms = ["Twitter", "LinkedIn", "YouTube", "Blog", "Email", "ChatGPT", "Cursor"]
+            # Use "Auto" as default if no platform provided
+            if not platform_input:
+                platform_input = "Auto"
+
+            valid_platforms = ["Auto", "Twitter", "LinkedIn", "YouTube", "Blog", "Email", "ChatGPT", "Cursor"]
             if platform_input not in valid_platforms:
                 return jsonify({
                     "success": False,
@@ -103,14 +107,8 @@ def create_app() -> Flask:
                     "error": "Missing 'input' field in request body"
                 }), 400
 
-            if 'platform' not in data:
-                return jsonify({
-                    "success": False,
-                    "error": "Missing 'platform' field in request body"
-                }), 400
-
             user_input = data['input'].strip()
-            platform_input = data['platform'].strip()
+            platform_input = data.get('platform', '').strip()
 
             if not user_input:
                 return jsonify({
@@ -118,13 +116,11 @@ def create_app() -> Flask:
                     "error": "Input cannot be empty"
                 }), 400
 
+            # Use "Auto" as default if no platform provided
             if not platform_input:
-                return jsonify({
-                    "success": False,
-                    "error": "Platform cannot be empty"
-                }), 400
+                platform_input = "Auto"
 
-            valid_platforms = ["Twitter", "LinkedIn", "YouTube", "Blog", "Email", "ChatGPT", "Cursor"]
+            valid_platforms = ["Auto", "Twitter", "LinkedIn", "YouTube", "Blog", "Email", "ChatGPT", "Cursor"]
             if platform_input not in valid_platforms:
                 return jsonify({
                     "success": False,

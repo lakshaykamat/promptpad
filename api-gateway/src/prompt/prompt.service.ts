@@ -15,11 +15,14 @@ export class PromptService {
 
   async getEnhancedPrompt(
     input: string,
-    platform: string,
+    platform?: string,
   ): Promise<PromptApiResponse> {
-    if (!input || !platform) {
-      throw new BadRequestException('Both input and platform are required');
+    if (!input) {
+      throw new BadRequestException('Input is required');
     }
+
+    // Use 'Auto' as default platform if none provided
+    const selectedPlatform = platform || 'Auto';
 
     const url = this.configService.get<string>('PROMPT_ENGINE_URL');
     if (!url) {
@@ -30,7 +33,7 @@ export class PromptService {
       const endpoint = new URL('/generate-full', url).toString();
       const res = await axios.post<PromptApiResponse>(
         endpoint,
-        { input, platform },
+        { input, platform: selectedPlatform },
         {
           timeout: 30000,
           headers: { 'Content-Type': 'application/json' },
@@ -58,16 +61,19 @@ export class PromptService {
 
   async streamEnhancedPrompt(
     input: string,
-    platform: string,
     res: Response,
+    platform?: string,
   ): Promise<void> {
-    if (!input || !platform) {
+    if (!input) {
       throw new BadRequestException({
         success: false,
-        error: 'Both input and platform are required',
-        code: 'MISSING_FIELDS',
+        error: 'Input is required',
+        code: 'MISSING_INPUT',
       });
     }
+
+    // Use 'Auto' as default platform if none provided
+    const selectedPlatform = platform || 'Auto';
 
     const url = this.configService.get<string>('PROMPT_ENGINE_URL');
     if (!url) {
@@ -82,7 +88,7 @@ export class PromptService {
       const endpoint = new URL('/generate', url).toString();
       const flaskRes = await axios.post<Readable>(
         endpoint,
-        { input, platform },
+        { input, platform: selectedPlatform },
         {
           responseType: 'stream',
           headers: { 'Content-Type': 'application/json' },

@@ -43,6 +43,7 @@ export default function HomePage() {
   ];
 
   const platforms = [
+    { name: "Auto", icon: Sparkles, description: "AI-determined best platform" },
     { name: "Twitter", icon: Twitter, description: "Social media posts" },
     { name: "LinkedIn", icon: Linkedin, description: "Professional content" },
     { name: "YouTube", icon: Video, description: "Video scripts" },
@@ -72,7 +73,7 @@ export default function HomePage() {
           
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             Create professional, engaging content with AI-powered prompt enhancement. 
-            Optimized for 7+ platforms with intelligent customization.
+            Optimized for 8+ platforms with intelligent customization.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">

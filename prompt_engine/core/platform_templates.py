@@ -8,6 +8,7 @@ class PlatformTemplates:
     """Contains platform-specific prompt customization templates."""
     
     PLATFORMS = {
+        "Auto": "auto",
         "Twitter": "twitter",
         "LinkedIn": "linkedin", 
         "YouTube": "youtube",
@@ -29,6 +30,13 @@ class PlatformTemplates:
             Dictionary with platform-specific context
         """
         templates = {
+            "Auto": {
+                "character_limit": 2000,
+                "tone": "adaptive, engaging, platform-optimized",
+                "format": "intelligent format selection based on content",
+                "purpose": "automatically determine the best platform and optimize accordingly",
+                "style_guide": "Analyze content type and automatically apply the most suitable platform optimization"
+            },
             "Twitter": {
                 "character_limit": 280,
                 "tone": "concise, engaging, conversational",
@@ -80,7 +88,7 @@ class PlatformTemplates:
             }
         }
         
-        return templates.get(platform, templates["Blog"])
+        return templates.get(platform, templates["Auto"])
     
     @staticmethod
     def get_platform_prompt_template(platform: str, user_input: str) -> str:
@@ -97,6 +105,18 @@ class PlatformTemplates:
         context = PlatformTemplates.get_platform_context(platform)
         
         templates = {
+            "Auto": f"""Create an engaging explanation about {user_input} that would work well as a comprehensive blog post. 
+
+Include:
+- Clear, beginner-friendly explanations
+- Practical examples and use cases
+- Key concepts and terminology
+- Best practices and tips
+- Engaging structure with headings
+- Call-to-action for further learning
+
+Make it informative, well-structured, and valuable for readers who want to understand this topic thoroughly.""",
+
             "Twitter": f"""You are a social media expert. Create a Twitter post about {user_input}. Make it engaging, shareable, and optimized for Twitter's algorithm. Keep it under {context['character_limit']} characters with a {context['tone']} tone. {context['style_guide']}""",
 
             "LinkedIn": f"""You are a professional thought leader. Create a LinkedIn post about {user_input}. Demonstrate thought leadership and provide valuable insights. Keep it under {context['character_limit']} characters with a {context['tone']} tone. {context['style_guide']}""",
@@ -112,7 +132,7 @@ class PlatformTemplates:
             "Cursor": f"""You are a software developer. Create a coding solution for {user_input}. Specify the programming language, include specific requirements, provide context, and give clear implementation guidelines. Keep it under {context['character_limit']} characters with a {context['tone']} tone. {context['style_guide']}"""
         }
         
-        return templates.get(platform, templates["Blog"])
+        return templates.get(platform, templates["Auto"])
     
     @staticmethod
     def enhance_for_platform(platform: str, base_prompt: str) -> str:
@@ -129,6 +149,8 @@ class PlatformTemplates:
         context = PlatformTemplates.get_platform_context(platform)
         
         enhancements = {
+            "Auto": f"\n\nOptimize this as a comprehensive blog post:\n- Use clear headings and structure\n- Include practical examples\n- Make it beginner-friendly\n- Add engaging elements and call-to-action\n- Ensure it's informative and valuable",
+            
             "Twitter": f"\n\nOptimize this for Twitter:\n- Keep under {context['character_limit']} characters\n- Make it shareable and engaging\n- Include relevant hashtags\n- Use conversational tone",
             
             "LinkedIn": f"\n\nOptimize this for LinkedIn:\n- Professional tone and structure\n- Include industry insights\n- Encourage professional discussion\n- Use bullet points for clarity",
