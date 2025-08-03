@@ -69,6 +69,12 @@ export default function Dashboard() {
 
   const platforms = [
     {
+      value: "Auto",
+      label: "Auto",
+      icon: Sparkles,
+      description: "AI-determined best platform",
+    },
+    {
       value: "Twitter",
       label: "Twitter",
       icon: Twitter,
@@ -118,10 +124,7 @@ export default function Dashboard() {
       return;
     }
 
-    if (!selectedPlatform) {
-      setError("Please select a platform to generate a prompt.");
-      return;
-    }
+    // Platform is optional now - if not selected, it will use "Auto" by default
 
     setLoading(true);
     setError(null);
@@ -133,7 +136,7 @@ export default function Dashboard() {
     try {
       const response = await getEnhancedPrompt(
         userInput.trim(),
-        selectedPlatform,
+        selectedPlatform || undefined,
         (chunk) => {
           // Real-time streaming from Flask API
           // Show progress messages
@@ -175,8 +178,8 @@ export default function Dashboard() {
         // Handle specific error codes from the API
         if (errorText.includes('invalid_platform')) {
           errorMessage = "Please select a valid platform from the options above.";
-        } else if (errorText.includes('missing_fields')) {
-          errorMessage = "Please provide both content idea and platform selection.";
+        } else if (errorText.includes('missing_input')) {
+          errorMessage = "Please provide a content idea to generate a prompt.";
         } else if (errorText.includes('timeout')) {
           errorMessage = "The request timed out. Please try again with a shorter content description.";
         } else if (errorText.includes('network_error')) {
@@ -361,7 +364,7 @@ export default function Dashboard() {
 
                 <Button
                   onClick={handleGenerate}
-                  disabled={loading || !userInput.trim() || !selectedPlatform}
+                  disabled={loading || !userInput.trim()}
                   className="w-full py-3 text-base font-medium"
                 >
                   {loading ? (
@@ -434,7 +437,7 @@ export default function Dashboard() {
                           ? "Fix the error above and try again"
                           : loading
                           ? currentProgress || "Generating your enhanced prompt..."
-                          : "Select a platform and enter your content idea to generate an enhanced prompt"}
+                          : "Enter your content idea to generate an enhanced prompt (platform selection is optional)"}
                       </p>
                     </div>
                   </div>

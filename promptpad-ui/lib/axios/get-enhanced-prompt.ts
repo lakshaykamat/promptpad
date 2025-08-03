@@ -17,7 +17,7 @@ export interface ApiError {
 
 export async function getEnhancedPrompt(
   userPrompt: string,
-  platform: string,
+  platform?: string,
   onChunk?: (chunk: string) => void
 ): Promise<EnhancePromptApiResponse> {
   const baseURL = process.env.NEXT_PUBLIC_GATEWAY_URL;
@@ -33,7 +33,7 @@ export async function getEnhancedPrompt(
     },
     body: JSON.stringify({
       input: userPrompt,
-      platform: platform
+      ...(platform && { platform })
     }),
   });
 
@@ -93,7 +93,7 @@ export async function getEnhancedPrompt(
     finalResponse = {
       success: true,
       input: userPrompt,
-      platform: platform,
+      platform: platform || 'Auto',
       prompt: accumulatedPrompt,
     };
 
